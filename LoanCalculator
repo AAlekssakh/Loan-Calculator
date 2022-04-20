@@ -1,0 +1,105 @@
+import argparse
+import math
+
+parser = argparse.ArgumentParser(description='The loan calculator')
+
+parser.add_argument("--type", choices=["annuity", "diff"],
+                    help='You need to choose a type of the loan')
+parser.add_argument("-P", "--principal", type=int,
+                    help="You need to type a loan principal")
+parser.add_argument("-A", "--payment", type=int,
+                    help="You need to type an amount of payment")
+parser.add_argument("-n", "--periods", type=int,
+                    help="You need to type a number of periods")
+parser.add_argument("-i", "--interest", type=float,
+                    help="You need to type an interest rate")
+
+args = parser.parse_args()
+param = [args.principal, args.payment, args.periods, args.interest]
+
+P = [0]
+A = param[1]
+n = param[2]
+i = param[3] / 12 / 100
+
+# ANNUITY
+
+if args.type == 'annuity':
+
+    if args.principal is None:
+
+        if args.payment is None or args.periods is None or args.interest is None:
+            print("Incorrect parameters")
+        else:
+
+            P = (A / ((i * (1 + i) ** n) / ((1 + i) ** n - 1)))
+            P = math.floor(P)
+            print(f'Your loan principal = {P}!')
+
+    elif args.payment is None:
+
+        if args.principal is None or args.periods is None or args.interest is None:
+            print("Incorrect parameters")
+        else:
+
+            A = P * ((i * (1 + i) ** n) / ((1 + i) ** n - 1))
+            A = math.ceil(A)
+            print(f'Your annuity payment = {A}!')
+
+    elif args.periods is None:
+
+        if args.principal is None or args.payment is None or args.interest is None:
+            print("Incorrect parameters")
+        else:
+
+            x = 1
+            a = A / (A - i * P)
+            b = x + i
+
+            n = math.log(a, b)
+            n = math.ceil(n)
+
+            y = int(math.floor(n / 12))
+            m = int(n - y * 12)
+
+            if y == 0 and m == 1:
+                print(f'It will take 1 month to repay this loan!')
+            elif y == 0 and m > 1:
+                print(f'It will take {m} months to repay this loan!')
+            elif y == 1 and m == 0:
+                print(f'It will take 12 month to repay this loan!')
+            elif y == 1 and m == 1:
+                print(f'It will take {y} year and 1 month to repay this loan!')
+            elif y == 1 and m > 1:
+                print(f'It will take 1 year and {m} months to repay this loan!')
+            elif y > 1 and m == 0:
+                print(f'It will take {y} years to repay this loan!')
+            elif y > 1 and m > 1:
+                print(f'It will take {y} years and {m} months to repay this loan!')
+
+    overpayment = - (P - A * n)
+    print(f"Overpayment = {overpayment}")
+
+
+# DIFF
+
+elif args.type == 'diff':
+
+    if args.principal is None or args.periods is None or args.interest is None:
+        print("Incorrect parameters")
+    else:
+
+        Ds = 0
+
+        for m in range(n + 1):
+
+            if m > 0:
+                D = math.ceil((P / n) + (i * (P - ((P * (m - 1)) / n))))
+                print(f"Month {m}: payment is {D}")
+
+                Ds = Ds + D
+
+                if m == n:
+                    overpayment = (Ds - P)
+                    print('')
+                    print(f"Overpayment = {overpayment}")
